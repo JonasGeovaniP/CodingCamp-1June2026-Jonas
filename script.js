@@ -1,226 +1,275 @@
-const greeting=
-document.getElementById('greeting');
+// ==============================
+// Element selectors
+// ==============================
+const greeting = document.getElementById('greeting');
+const nameInput = document.getElementById('nameInput');
+const clock = document.getElementById('clock');
+const date = document.getElementById('date');
+const themeToggle = document.getElementById('themeToggle');
+const timerDisplay = document.getElementById('timer');
+const taskInput = document.getElementById('taskInput');
+const taskProgress = document.getElementById('taskProgress');
+const taskList = document.getElementById('taskList');
+const linkName = document.getElementById('linkName');
+const linkUrl = document.getElementById('linkUrl');
+const linksContainer = document.getElementById('linksContainer');
 
-function updateGreeting(){
+// ==============================
+// App state
+// ==============================
+const WAVE_ICON = String.fromCodePoint(0x1f44b);
+const DEFAULT_TIMER_SECONDS = 1500;
 
-const h=
-new Date().getHours();
+let time = DEFAULT_TIMER_SECONDS;
+let interval = null;
+let currentFilter = 'all';
+let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+let links = JSON.parse(localStorage.getItem('links') || '[]');
 
-const n=
-localStorage.getItem('username')||'Guys';
+// ==============================
+// Greeting section
+// ==============================
+function updateGreeting() {
+    const hour = new Date().getHours();
+    const username = localStorage.getItem('username') || 'Guys';
+    const greetingText =
+        hour < 12
+            ? 'Good Morning'
+            : hour < 18
+                ? 'Good Afternoon'
+                : 'Good Evening';
 
-let t=
-h<12?'Good Morning':h<15?'Good Afternoon':h<18?'Good Afternoon':'Good Evening';
-
-greeting.textContent=`${t}, ${n} 👋`;
-
+    greeting.textContent = `${greetingText}, ${username} ${WAVE_ICON}`;
 }
 
-function saveName(){
+function saveName() {
+    const username = nameInput.value.trim();
 
-const i=
-document.getElementById('nameInput');
+    if (!username) return;
 
-if(!i.value.trim())return;
-
-localStorage.setItem('username',i.value.trim());
-
-i.value='';updateGreeting();
-
+    localStorage.setItem('username', username);
+    nameInput.value = '';
+    updateGreeting();
 }
 
-updateGreeting();
-
-function updateDateTime(){
+// ==============================
+// Clock and date section
+// ==============================
+function updateDateTime() {
     const now = new Date();
 
-    document.getElementById("clock")
-    .textContent = now.toLocaleTimeString ("id-ID");
-    document.getElementById("date")
-    .textContent = now. toLocaleDateString ("id-ID",
-    {
-        weekday:"long",
-        day:"numeric",
-        month:"long",
-        year:"numeric"
+    clock.textContent = now.toLocaleTimeString('id-ID');
+    date.textContent = now.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
     });
-
 }
 
-updateDateTime();
-setInterval(updateDateTime, 1000)
+// ==============================
+// Theme switch section
+// ==============================
+function loadTheme() {
+    const savedTheme = localStorage.getItem('theme');
 
-const themeToggle=document.getElementById('themeToggle');
-
-if(localStorage.getItem('theme')==='dark'){document.body.classList.add('dark');themeToggle.checked=true;
-
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark');
+        themeToggle.checked = true;
+    }
 }
 
-themeToggle.addEventListener('change',()=>{
+function toggleTheme() {
+    document.body.classList.toggle('dark', themeToggle.checked);
+    localStorage.setItem('theme', themeToggle.checked ? 'dark' : 'light');
+}
 
-document.body.classList.toggle('dark',themeToggle.checked);
+// ==============================
+// Focus timer section
+// ==============================
+function updateTimer() {
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
 
-localStorage.setItem('theme',themeToggle.checked?'dark':'light');
+    timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
 
-});
+function startTimer() {
+    if (interval) return;
 
-let time=1500, interval=null;
-
-function updateTimer(){
-
-    const m=Math
-
-    .floor(time/60),s=time%60;document
-
-    .getElementById('timer')
-
-    .textContent=`${String(m)
-
-        .padStart(2,'0')}:${String(s)
-
-            .padStart(2,'0')}`
+    interval = setInterval(() => {
+        if (time > 0) {
+            time--;
+            updateTimer();
+            return;
         }
 
-function startTimer(){
+        clearInterval(interval);
+        interval = null;
+        alert('Waktu fokus selesai!');
+    }, 1000);
+}
 
-    if(interval)return;
+function pauseTimer() {
+    clearInterval(interval);
+    interval = null;
+}
 
-    interval=setInterval(()=>{if(time>0){time--;
+function resetTimer() {
+    clearInterval(interval);
+    interval = null;
+    time = DEFAULT_TIMER_SECONDS;
+    updateTimer();
+}
 
-        updateTimer()}else{clearInterval(interval);
+// ==============================
+// To-do list section
+// ==============================
+function saveTasks() {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+}
 
-            interval=null;
+function updateProgress() {
+    const completedTasks = tasks.filter((task) => task.completed).length;
+    taskProgress.textContent = `${completedTasks} / ${tasks.length} completed`;
+}
 
-            alert('Waktu fokus selesai!')}
+function setFilter(filter) {
+    currentFilter = filter;
+    renderTasks();
+}
 
-        }
-
-        ,1000)
-    
+function getFilteredTasks() {
+    if (currentFilter === 'active') {
+        return tasks.filter((task) => !task.completed);
     }
 
-function pauseTimer(){
+    if (currentFilter === 'completed') {
+        return tasks.filter((task) => task.completed);
+    }
 
-    clearInterval(interval);
-
-    interval=null
+    return tasks;
 }
 
-function resetTimer(){
+function renderTasks() {
+    taskList.innerHTML = '';
 
-    clearInterval(interval);
+    getFilteredTasks().forEach((task) => {
+        const taskIndex = tasks.indexOf(task);
+        const listItem = document.createElement('li');
 
-    interval=null;
+        listItem.innerHTML = `
+            <span class="${task.completed ? 'done' : ''}">${task.text}</span>
+            <div class="task-actions">
+                <button onclick="toggleTask(${taskIndex})">&#10003;</button>
+                <button onclick="deleteTask(${taskIndex})">&#128465;</button>
+            </div>
+        `;
 
-    time=1500;
+        taskList.appendChild(listItem);
+    });
 
-    updateTimer()
-
+    updateProgress();
 }
 
+function addTask() {
+    const text = taskInput.value.trim();
+
+    if (!text) return;
+
+    tasks.unshift({
+        text,
+        completed: false
+    });
+
+    saveTasks();
+    renderTasks();
+    taskInput.value = '';
+}
+
+function toggleTask(index) {
+    tasks[index].completed = !tasks[index].completed;
+    saveTasks();
+    renderTasks();
+}
+
+function deleteTask(index) {
+    tasks.splice(index, 1);
+    saveTasks();
+    renderTasks();
+}
+
+// ==============================
+// Quick links section
+// ==============================
+function saveLinks() {
+    localStorage.setItem('links', JSON.stringify(links));
+}
+
+function renderLinks() {
+    linksContainer.innerHTML = '';
+
+    links.forEach((link, index) => {
+        const linkItem = document.createElement('div');
+        linkItem.className = 'link-item';
+
+        linkItem.innerHTML = `
+            <a href="${link.url}" target="_blank">${link.name}</a>
+            <button onclick="deleteLink(${index})">&#128465;</button>
+        `;
+
+        linksContainer.appendChild(linkItem);
+    });
+}
+
+function addLink() {
+    const name = linkName.value.trim();
+    const url = linkUrl.value.trim();
+
+    if (!name || !url) return;
+
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        alert('Input the correct url');
+        return;
+    }
+
+    links.push({
+        name,
+        url
+    });
+
+    saveLinks();
+    renderLinks();
+    linkName.value = '';
+    linkUrl.value = '';
+}
+
+function deleteLink(index) {
+    links.splice(index, 1);
+    saveLinks();
+    renderLinks();
+}
+
+// ==============================
+// Event listeners
+// ==============================
+themeToggle.addEventListener('change', toggleTheme);
+
+taskInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') addTask();
+});
+
+nameInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') saveName();
+});
+
+// ==============================
+// Initial render
+// ==============================
+loadTheme();
+updateGreeting();
+updateDateTime();
 updateTimer();
-
-let tasks=JSON.parse(localStorage.getItem('tasks')||'[]');
-
-let currentFilter='all';
-
-function saveTasks(){
-
-    localStorage.setItem('tasks',JSON.stringify(tasks))
-
-}
-function updateProgress(){
-
-    const c=tasks
-
-    .filter(t=>t.completed).length;
-
-    document.getElementById('taskProgress').textContent=`${c} / ${tasks.length} completed`
-
-}
-
-function setFilter(f){currentFilter=f;renderTasks()}
-
-function renderTasks(){
-
-const list=document.getElementById('taskList');list.innerHTML='';
-
-let filtered=tasks;
-
-if(currentFilter==='active')filtered=tasks.filter(t=>!t.completed);
-
-if(currentFilter==='completed')filtered=tasks.filter(t=>t.completed);
-
-filtered.forEach(task=>{
-
-const idx=tasks.indexOf(task);
-
-const li=document.createElement('li');
-
-li.innerHTML=`<span class="${task.completed?'done':''}">${task.text} </span><div class="task-actions"><button onclick="toggleTask(${idx})">✓</button><button onclick="deleteTask(${idx})">🗑</button></div>`;
-list.appendChild(li);
-});
-
-updateProgress();
-
-}
-
-function addTask(){
-
-const i=document.getElementById('taskInput');
-
-const text=i.value.trim(); if(!text)return;
-
-tasks.unshift({text,completed:false}); saveTasks(); renderTasks(); i.value='';
-
-}
-
-function toggleTask(i){tasks[i].completed=!tasks[i].completed;saveTasks();renderTasks()}
-
-function deleteTask(i){tasks.splice(i,1);saveTasks();renderTasks()}
-
-document.getElementById('taskInput').addEventListener('keypress',e=>{if(e.key==='Enter')addTask()});
-
-document.getElementById('nameInput').addEventListener('keypress',e=>{if(e.key==='Enter')saveName()});
-
 renderTasks();
-
-let links=JSON.parse(localStorage.getItem('links')||'[]');
-
-function saveLinks(){localStorage.setItem('links',JSON.stringify(links))}
-
-function renderLinks(){
-
-const c=document.getElementById('linksContainer'); c.innerHTML='';
-
-links.forEach((link,i)=>{
-
-const d=document.createElement('div'); d.className='link-item';
-
-d.innerHTML=`<a href="${link.url}" target="_blank">${link.name}</a><button onclick="deleteLink(${i})">🗑</button>`;
-
-c.appendChild(d);
-
-});
-
-}
-
-function addLink(){
-
-const n=document.getElementById('linkName');
-
-const u=document.getElementById('linkUrl');
-
-if(!n.value.trim()||!u.value.trim()) return;
-
-if(!u.value.startsWith('http://')&&!u.value.startsWith('https://')){alert('Input the correct url');return;}
-
-links.push({name:n.value.trim(),url:u.value.trim()});
-
-saveLinks(); renderLinks(); n.value=''; u.value='';
-
-}
-
-function deleteLink(i){links.splice(i,1); saveLinks(); renderLinks();}
-
 renderLinks();
+setInterval(updateDateTime, 1000);

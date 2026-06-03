@@ -1,3 +1,4 @@
+/* Global reset */
 *{
     margin:0;
     padding:0;
@@ -5,6 +6,7 @@
     font-family:'Segoe UI',sans-serif
 }
 
+/* Light theme variables */
 :root{
     --bg:#f8fafc;
     --card:#fff;
@@ -14,6 +16,7 @@
     --task:#f1f5f9
 }
 
+/* Dark theme variables */
 body.dark{
     --bg:#0f172a;
     --card:#1e293b;
@@ -22,17 +25,20 @@ body.dark{
     --task:#334155
 }
 
+/* Base page style */
 body{
     background:var(--bg);
     color:var(--text);
     padding:20px
 }
 
+/* Main container */
 .container{
     max-width:1100px;
     margin:auto
 }
 
+/* Card layout */
 .card{
     background:var(--card);
     padding:24px;
@@ -41,18 +47,21 @@ body{
     box-shadow:0 10px 25px rgba(0,0,0,.08)
 }
 
+/* Header section */
 .header{
     display:flex;
     justify-content:space-between;
     gap:20px
 }
 
+/* Main content grid */
 .grid{
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:20px
 }
 
+/* Form input */
 input[type=text]{
     width:100%;
     padding:12px;
@@ -63,6 +72,7 @@ input[type=text]{
     color:var(--text)
 }
 
+/* Button style */
 button{
     border:none;
     background:var(--primary);
@@ -77,18 +87,21 @@ button:hover{
     opacity:.9
 }
 
+/* Focus timer section */
 #timer{
     text-align:center;
     font-size:3rem;
     margin:20px 0
 }
 
+/* Button and link groups */
 .filters,.links,.task-actions{
     display:flex;
     gap:10px;
     flex-wrap:wrap
 }
 
+/* To-do list section */
 #taskList{
     margin-top:10px
 }
@@ -109,6 +122,7 @@ button:hover{
     opacity:.6
 }
 
+/* Quick links section */
 .link-item a{
     text-decoration:none;
     background:var(--primary);
@@ -117,6 +131,7 @@ button:hover{
     border-radius:10px
 }
 
+/* Theme switch */
 .switch{
     position:relative;
     display:inline-block;
@@ -155,6 +170,7 @@ button:hover{
     transform:translateX(26px)
 }
 
+/* Responsive layout */
 @media(max-width:768px){
     .grid{
         grid-template-columns:1fr
@@ -164,6 +180,7 @@ button:hover{
     }
 }
 
+/* Clock and date */
 #clock{
     font-size:1.2rem;
     font-weight:600;
