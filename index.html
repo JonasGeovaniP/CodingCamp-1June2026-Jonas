@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do Life Dashboard</title>
+     <link rel="stylesheet" href="style.css">
+  </head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+
+  <div class="card header">
+    <div>
+      <h1 id="greeting"></h1>
+      <p id="clock"></p>
+      <p id="date"></p>
+      <input type="text" id="nameInput" placeholder="Enter your name...">
+      <button onclick="saveName()">Save</button>
+    </div>
+    <label class="switch">
+      <input type="checkbox" id="themeToggle">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <!-- MAIN -->
+
+  <div class="grid">
+
+  <!-- TIMER -->
+
+    <div class="card">
+      <h2>Focus Timer</h2>
+      <h1 id="timer">25:00</h1>
+      <div class="timer-controls">
+        <button onclick="startTimer()">Start</button>
+        <button onclick="pauseTimer()">Pause</button>
+        <button onclick="resetTimer()">Reset</button>
+      </div>
+    </div>
+
+  <!-- TODO LIST -->
+
+    <div class="card">
+      <h2>To-Do List</h2>
+      <input type="text" id="taskInput" placeholder="Add tasks...">
+      <button onclick="addTask()">Add</button>
+
+      <p id="taskProgress">0 / 0 completed</p>
+
+      <div class="filters">
+        <button onclick="setFilter('all')">All</button>
+        <button onclick="setFilter('active')">Active</button>
+        <button onclick="setFilter('completed')">Completed</button>
+      </div>
+
+      <ul id="taskList"></ul>
+    </div>
+  </div>
+
+  <!-- QUICK LINKS -->
+
+  <div class="card">
+    <h2>Quick Links</h2>
+    <input type="text" id="linkName" placeholder="Input link">
+    <input type="text" id="linkUrl" placeholder="https://...">
+    <button onclick="addLink()">Add Link</button>
+    <div class="links" id="linksContainer"></div>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
